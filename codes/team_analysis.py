@@ -8,8 +8,21 @@ import matplotlib.gridspec as gridspec
 import matplotlib.colors as clr
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from matplotlib.lines import Line2D
+import matplotlib.font_manager as font_manager
 
 plt.style.use('ggplot')
+
+path = '/System/Library/Fonts/Supplemental/Didot.ttc'
+prop = font_manager.FontProperties(fname=path)
+plt.rcParams['font.family'] = prop.get_name()
+
+plt.rcParams['figure.facecolor'] = '#003049'
+plt.rcParams['axes.facecolor'] = '#EAE2B7'
+plt.rcParams['text.color'] = '#EAE2B7'
+plt.rcParams['axes.labelcolor'] = '#EAE2B7'
+plt.rcParams['xtick.color'] = '#EAE2B7'
+plt.rcParams['ytick.color'] = '#EAE2B7'
+rcParams['grid.color'] = '#EAE2B7'
 
 color_map = clr.LinearSegmentedColormap.from_list(
     "intensity", [(0.0, '#EAE2B7'),
@@ -17,7 +30,11 @@ color_map = clr.LinearSegmentedColormap.from_list(
                 #  (0.5, '#FCBF49'),
                 #  (0.75, '#FF8080'),
                  (1, '#D62828')])
-
+# %%
+def plot_generator(fig_size=(16,9), row=1, col=1):
+    fig = plt.figure(figsize=fig_size, constrained_layout=True)
+    spec = gridspec.GridSpec(ncols=row, nrows=col, figure=fig)
+    return fig
 # %%
 csv_path = 'fbref'
 csv_files = [os.path.join(csv_path, f) for f in os.listdir(csv_path)]

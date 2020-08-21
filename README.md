@@ -1,6 +1,6 @@
-# Football Analytics Repo
+# Football Analytics
 
-## To DO
+## To Do
 
 - [x] Move `fbref_scraper.py` to this repo
 - [x] Add frequently used scripts
