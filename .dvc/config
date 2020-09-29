@@ -2,3 +2,4 @@
     remote = s3
 ['remote "s3"']
     url = s3://football-database
+    profile = mai
