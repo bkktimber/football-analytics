@@ -5,6 +5,7 @@ import requests
 import time
 import random
 import os
+import time
 from glob import glob
 from tqdm import tqdm
 
@@ -12,7 +13,7 @@ from tqdm import tqdm
 col_names = ['match_id', 'gameweek', 'day_of_week',
              'date', 'time', 'home_team', 'xg_home', 'score_home',
              'score_away', 'xg_away', 'away_team', 'attendance', 'venue',
-             'referee', 'match_report_url', 'tmp1']
+             'referee', 'match_report_url']
 
 summary_col_names = ['player_name', 'shirt_num', 'nationality',
                      'position', 'minute_played',
@@ -88,9 +89,9 @@ shot_col_names = ['minute', 'player_name', 'squad',
                   'sca_1_player_name', 'sca_1_pass_type',
                   'sca_2_player_name', 'sca_2_pass_type',]
 
-
-url = 'https://fbref.com/en/comps/9/schedule/Premier-League-Scores-and-Fixtures'
 url_base = 'https://fbref.com/en'
+
+match_report_dir = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
 
 # %%
 def url_request(url=None):
@@ -142,8 +143,7 @@ def extract_fixture(fixture_list=None, match_week=(0, 0), match_id=(0, 0)):
     idx = 0
     (week_start, week_end) = match_week
     (match_start, match_end) = match_id
-
-    for row in table:
+    for row in fixture_list:
         if not row.attrs.get('class'):
             match = []
             idx+=1
@@ -157,24 +157,31 @@ def extract_fixture(fixture_list=None, match_week=(0, 0), match_id=(0, 0)):
                     if col['data-stat'] == 'match_report':
                         match.append(col.find('a')['href'])
                     elif col['data-stat'] == 'score':
-                        try:
-                            match.append(col.text.split('–')[0])
-                            match.append(col.text.split('–')[1])
-                        except:
-                            match.append(None)
-                            match.append(None)
+                        match.append(col.text.split('–')[0])
+                        match.append(col.text.split('–')[1])
                     else:
                         match.append(col.text)
             else:
-                # match += [col.text for col in row]
                 continue
             if len(match) > 16:
                 data.append(match[:-1])
             else:
-                data.append(match)
+                data.append(match[:-1])
     return data
 
+
+def extract_match_report(response=None):
+    soup = BeautifulSoup(response.content)
+    table = soup.find('div', {'class': 'section_wrapper',
+                            'id': 'all_kitchen_sink_shots'})
+    table = table.find('div', {'class': 'section_content',
+                            'id': 'div_kitchen_sink_shots'})
+    tables = table.find_all('div', {'class': 'table_wrapper'})
+    return None
+
+
 # %%
+url = 'https://fbref.com/en/comps/13/3243/schedule/2019-2020-Ligue-1-Scores-and-Fixtures'
 response = url_request(url)
 previous_flag = check_previous(response.content)
 while previous_flag[0]:
@@ -196,6 +203,7 @@ while previous_flag[0]:
 print('No more fixure')
 
 # %%
+
 soup = BeautifulSoup(response.content)
 table = soup.find('div', {'class': 'overthrow table_container',
                               'id': 'div_sched_ks_10728_1'})
@@ -238,6 +246,224 @@ def get_results_from_fixture(response=None, match_week=(0, 0), match_id=(0, 0)):
     data = []
     return data
 # %%
-df.to_csv('/Users/Mai/Projects/ideas/open-data/fbref/fff/20192020/fixtures.csv')
-t1 = time.time()
-print(f'take {t1-t0:.2f} s')
+df.to_csv('/Users/Mai/Projects/football-analytics/data/epl/20202021/fixtures.csv')
+# t1 = time.time()
+# print(f'take {t1-t0:.2f} s')
+
+# %%
+last_match = 18
+save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+
+for idx, item in df.iterrows():
+    if not (item.match_id > last_match):
+        continue
+    file_prefix = f'gw{str(item.gameweek)}_match_{item.match_id}'
+    match_url = item.match_report_url
+    home_url = 'https://fbref.com'
+    match_url = home_url + match_url
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    print('request from', match_url)
+    t0 = time.time()
+    try:
+        response = requests.get(match_url, headers=headers)
+    except requests.exceptions.ConnectionError:
+        print('sleep...')
+        time.sleep(60)
+        print('try again')
+        response = requests.get(match_url, headers=headers)
+    t1 = time.time()
+    print('status:', response.status_code)
+    print(f'complete in {t1-t0:.2f} s')
+
+    print('extracting data...')
+    soup = BeautifulSoup(response.content)
+
+    table = soup.find('div', {'class': 'section_wrapper',
+                            'id': 'all_kitchen_sink_shots'})
+    table = table.find('div', {'class': 'section_content',
+                            'id': 'div_kitchen_sink_shots'})
+    tables = table.find_all('div', {'class': 'table_wrapper'})
+
+    for idx, t in enumerate(tables):
+        if idx == 1:
+            home_team_hash = tables[1]['id'].split('_')[-1]
+            t = BeautifulSoup(t.find(string=lambda text: isinstance(text, Comment)))
+            data = []
+            for row in t.find_all('tr', {'class': 'shots_' + home_team_hash}):
+                shot = []
+                for col in row:
+                    shot.append(col.text)
+                data.append(shot)
+            save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+            save_file = os.path.join(save_file, ('gw_' + item.gameweek))
+            if not os.path.isdir(save_file):
+                os.mkdir(save_file)
+            save_file = os.path.join(save_file, ('match_id_' + str(item.match_id)))
+            if not os.path.isdir(save_file):
+                os.mkdir(save_file)
+                print('created folder ', save_file)
+            filename = 'home' + '_' + 'shots' + '.csv'
+            df_player = pd.DataFrame(data, columns=shot_col_names)
+            df_player.to_csv(os.path.join(save_file, filename))
+        if idx == 2:
+            away_team_hash = tables[2]['id'].split('_')[-1]
+            t = BeautifulSoup(t.find(string=lambda text: isinstance(text, Comment)))
+            data = []
+            for row in t.find_all('tr', {'class': 'shots_' + away_team_hash}):
+                shot = []
+                for col in row:
+                    shot.append(col.text)
+                data.append(shot)
+            save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+            save_file = os.path.join(save_file, ('gw_' + item.gameweek))
+            if not os.path.isdir(save_file):
+                os.mkdir(save_file)
+            save_file = os.path.join(save_file, ('match_id_' + str(item.match_id)))
+            if not os.path.isdir(save_file):
+                os.mkdir(save_file)
+                print('created folder ', save_file)
+            filename = 'away' + '_' + 'shots' + '.csv'
+            df_player = pd.DataFrame(data, columns=shot_col_names)
+            df_player.to_csv(os.path.join(save_file, filename))
+
+    home_team_hash = tables[1]['id'].split('_')[-1]
+    away_team_hash = tables[2]['id'].split('_')[-1]
+
+    wrapper_id_home = f'all_kitchen_sink_{home_team_hash}'
+    content_id_home = f'div_kitchen_sink_{home_team_hash}'
+    summary_id_home = f'all_stats_{home_team_hash}_summary'
+    passing_id_home = f'all_stats_{home_team_hash}_passing'
+    passing_types_id_home = f'all_stats_{home_team_hash}_passing_types'
+    defense_id_home = f'all_stats_{home_team_hash}_defense'
+    possession_id_home = f'all_stats_{home_team_hash}_possession'
+    misc_id_home = f'all_stats_{home_team_hash}_misc'
+    keeper_id_home = f'all_keeper_stats_{home_team_hash}'
+
+    wrapper_id_away = f'all_kitchen_sink_{away_team_hash}'
+    content_id_away = f'div_kitchen_sink_{away_team_hash}'
+    summary_id_away = f'all_stats_{away_team_hash}_summary'
+    passing_id_away = f'all_stats_{away_team_hash}_passing'
+    passing_types_id_away = f'all_stats_{away_team_hash}_passing_types'
+    defense_id_away = f'all_stats_{away_team_hash}_defense'
+    possession_id_away = f'all_stats_{away_team_hash}_possession'
+    misc_id_away = f'all_stats_{away_team_hash}_misc'
+    keeper_id_away = f'all_keeper_stats_{away_team_hash}'
+
+    home = {'key': 'home',
+            'top': [wrapper_id_home, content_id_home],
+            'data': [(summary_id_home, summary_col_names, 'summary'),
+                     (passing_id_home, passing_col_names, 'passing'), 
+                     (passing_types_id_home, passing_types_col_names, 'passing_type'),
+                     (defense_id_home, defense_col_names, 'defense'),
+                     (possession_id_home, possession_col_names, 'possession'),
+                     (misc_id_home, misc_col_names, 'misc'),
+                    #  (keeper_id_home, keeper_col_names)]
+                    ]}
+
+    away = {'key': 'away',
+            'top': [wrapper_id_away, content_id_away],
+            'data': [(summary_id_away, summary_col_names, 'summary'),
+                     (passing_id_away, passing_col_names, 'passing'), 
+                     (passing_types_id_away, passing_types_col_names, 'passing_type'),
+                     (defense_id_away, defense_col_names, 'defense'),
+                     (possession_id_away, possession_col_names, 'possession'),
+                     (misc_id_away, misc_col_names, 'misc'),
+                    #  (keeper_id_away, keeper_col_names)]
+                    ]}
+    gk_home = {'key': 'home',
+                'data': (keeper_id_home, keeper_col_names, 'keeper')
+                }
+    gk_away = {'key': 'away',
+                'data': (keeper_id_away, keeper_col_names, 'keeper')
+                }
+
+    # print('extracting players data....')
+    for team in [home, away]:
+        # print('extracting', team['key'], ' team')
+        top_level_keys = team['top']
+        data_keys = team['data']
+        table = soup.find('div', {'class': 'section_wrapper',
+                                'id': top_level_keys[0]})
+        table = table.find('div', {'class': 'section_content',
+                                'id': top_level_keys[1]})
+        for key in data_keys:
+            # print('extracting', key[2], 'table')
+            tables = table.find('div', {'id': key[0]})
+            tables = tables.find('table', {'id': key[0][4:]})
+            tables = tables.find('tbody')
+            tables = tables.find_all('tr')
+            data = []
+            for row in tables:
+                player = []
+                if not row.attrs.get('class'):
+                    for col in row:
+                        if col['data-stat'] == 'nationality':
+                            player.append(col.text.split()[-1])
+                        else:
+                            player.append(col.text)
+                data.append(player)
+            save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+            save_file = os.path.join(save_file, ('gw_' + item.gameweek))
+            if not os.path.isdir(save_file):
+                os.mkdir(save_file)
+            save_file = os.path.join(save_file, ('match_id_' + str(item.match_id)))
+            if not os.path.isdir(save_file):
+                os.mkdir(save_file)
+                print('created folder ', save_file)
+            filename = team['key'] + '_' + key[2] + '.csv'
+            df_player = pd.DataFrame(data, columns=key[1])
+            df_player.to_csv(os.path.join(save_file, filename))
+            # print('completed.')
+
+    for team in [gk_home, gk_away]:
+        table = soup.find('div', {'class': 'overthrow table_container',
+                                    'id': 'div_' + team['data'][0][4:]})
+        table = table.find('table', {'id': team['data'][0][4:]})
+        table = table.find('tbody')
+        table = table.find_all('tr')
+        data = []
+        for row in table:
+            player = []
+            if not row.attrs.get('class'):
+                for col in row:
+                    if col['data-stat'] == 'nationality':
+                        player.append(col.text.split()[-1])
+                    else:
+                        player.append(col.text)
+            data.append(player)
+            save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+            save_file = os.path.join(save_file, ('gw_' + item.gameweek))
+            if not os.path.isdir(save_file):
+                os.mkdir(save_file)
+            save_file = os.path.join(save_file, ('match_id_' + str(item.match_id)))
+            if not os.path.isdir(save_file):
+                os.mkdir(save_file)
+                print('created folder ', save_file)
+            filename = team['key'] + '_' + team['data'][2] + '.csv'
+            df_player = pd.DataFrame(data, columns=team['data'][1])
+            df_player.to_csv(os.path.join(save_file, filename))
+            # print('completed.')
+
+    manager = soup.find_all('div', {'class': 'datapoint'})
+    teamsheet = soup.find_all('div', {'class': 'lineup'})
+
+    team_mapping = ['home', 'away']
+    lineups = []
+    for idx, team in enumerate(teamsheet):
+        team = team.find_all('tr')
+        player = []
+        for p in team:
+            player.append(p.text+'\n')
+        for p in manager[idx * 2:(idx + 1) * 2]:
+            player.append(p.text+'\n')
+        filename = 'teamsheet_' + team_mapping[idx] + '.txt'
+        with open(os.path.join(save_file, filename), 'w') as f:
+            f.writelines(player)
+    
+    print('completed.')
+
+    print('enter sleep mode...')
+    i = random.randint(3, 7)
+    time.sleep(i * 11)
+    print(f'took {i * 11} s rest. ready to work!')
+# %%
