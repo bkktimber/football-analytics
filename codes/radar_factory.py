@@ -23,7 +23,7 @@ def radar_factory(num_vars, frame='circle'):
 
     """
     # calculate evenly-spaced axis angles
-    theta = np.linspace(0, 2*np.pi, num_vars, endpoint=False)
+    theta = np.linspace(0, 2 * np.pi, num_vars, endpoint=False)
 
     class RadarAxes(PolarAxes):
 
@@ -63,8 +63,10 @@ def radar_factory(num_vars, frame='circle'):
             if frame == 'circle':
                 return Circle((0.5, 0.5), 0.5)
             elif frame == 'polygon':
-                return RegularPolygon((0.5, 0.5), num_vars,
-                                      radius=.5, edgecolor="k")
+                return RegularPolygon((0.5, 0.5),
+                                      num_vars,
+                                      radius=.5,
+                                      edgecolor="k")
             else:
                 raise ValueError("unknown value for 'frame': %s" % frame)
 
@@ -79,8 +81,8 @@ def radar_factory(num_vars, frame='circle'):
                 # unit_regular_polygon gives a polygon of radius 1 centered at
                 # (0, 0) but we want a polygon of radius 0.5 centered at (0.5,
                 # 0.5) in axes coordinates.
-                spine.set_transform(Affine2D().scale(.5).translate(.5, .5)
-                                    + self.transAxes)
+                spine.set_transform(Affine2D().scale(.5).translate(.5, .5) +
+                                    self.transAxes)
                 return {'polar': spine}
             else:
                 raise ValueError("unknown value for 'frame': %s" % frame)

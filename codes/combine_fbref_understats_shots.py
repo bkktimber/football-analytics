@@ -20,10 +20,12 @@ for idx, match in fixtures.iterrows():
     report_path = f'data/epl/20202021/matches/gw_{gw}/match_id_{match_id}'
     break
     home_shots = pd.read_csv(os.path.join(report_path, 'home_shots.csv'))
-    home_shots_xg = pd.read_csv(os.path.join(understats_path, f'match_id_{match_id}', 'home_shots.csv'))
+    home_shots_xg = pd.read_csv(
+        os.path.join(understats_path, f'match_id_{match_id}',
+                     'home_shots.csv'))
     away_shots = pd.read_csv(os.path.join(report_path, 'away_shots.csv'))
 
-# step 
+# step
 # 1 convert shots minute to int
 # join on minute and player
 #  select relevent data
