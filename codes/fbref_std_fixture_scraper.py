@@ -246,15 +246,16 @@ def get_results_from_fixture(response=None, match_week=(0, 0), match_id=(0, 0)):
     data = []
     return data
 # %%
-df.to_csv('/Users/Mai/Projects/football-analytics/data/epl/20202021/fixtures.csv')
+df.to_csv('/Users/Mai/Projects/football-analytics/data/rfef/20202021/fixtures.csv')
 # t1 = time.time()
 # print(f'take {t1-t0:.2f} s')
 
 # %%
-last_match = 18
-save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+last_match = 28
+save_file = '/Users/Mai/Projects/football-analytics/data/rfrf/20202021/matches'
 
 for idx, item in df.iterrows():
+    cnt = int(idx)
     if not (item.match_id > last_match):
         continue
     file_prefix = f'gw{str(item.gameweek)}_match_{item.match_id}'
@@ -461,7 +462,6 @@ for idx, item in df.iterrows():
             f.writelines(player)
     
     print('completed.')
-
     print('enter sleep mode...')
     i = random.randint(3, 7)
     time.sleep(i * 11)

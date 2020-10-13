@@ -4,7 +4,7 @@
 
 - [x] Move `fbref_scraper.py` to this repo
 - [x] Add frequently used scripts
-- [ ] Migrate Data to this repo
+- [x] Migrate Data to this repo
 - [ ] Add link to  [statsbombs open data](https://github.com/statsbomb/open-data)
 
 ## List of Scripts
