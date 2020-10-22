@@ -21,8 +21,10 @@ nufc_fixtures.loc[(nufc_fixtures.away_team == selected_team), 'is_home'] = 0
 match_report_path = 'data/epl/20192020/matches'
 match_id = nufc_fixtures.iloc[0, 0]
 match_week = nufc_fixtures.iloc[0, 1]
-home_or_away_dict = {0: 'away',
-                     1: 'home',}
+home_or_away_dict = {
+    0: 'away',
+    1: 'home',
+}
 team_status = home_or_away_dict[nufc_fixtures.iloc[0, -1]]
 match_report_file = f'gw_{match_week}/match_id_{match_id}/teamsheet_{team_status}.txt'
 teamsheet_path = os.path.join(match_report_path, match_report_file)

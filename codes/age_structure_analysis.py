@@ -10,7 +10,8 @@ contract = 'data/assests/epl/new-utd.csv'
 epl_matches = 'data/epl/20192020'
 
 df_contract = pd.read_csv(contract, index_col=0)
-df_fixtures = pd.read_csv(os.path.join(epl_matches, 'fixtures.csv'), index_col=0)
+df_fixtures = pd.read_csv(os.path.join(epl_matches, 'fixtures.csv'),
+                          index_col=0)
 
 # %%
 selected_team = 'Newcastle Utd'
@@ -34,17 +35,25 @@ for idx, row in nufc_fixtures.iterrows():
     matches.append(tmp)
 
 df_players = pd.concat(matches).groupby(by='player_name')
-df_players = df_players.agg({'shirt_num': 'last',
-                             'minute_played': 'sum'}).reset_index()
+df_players = df_players.agg({
+    'shirt_num': 'last',
+    'minute_played': 'sum'
+}).reset_index()
 # %%
-df_contract.loc[:, 'shirt_num'] = df_contract.loc[:, 'shirt_num'].replace('-', 0)
+df_contract.loc[:, 'shirt_num'] = df_contract.loc[:,
+                                                  'shirt_num'].replace('-', 0)
 df_contract.loc[:, 'shirt_num'] = df_contract.loc[:, 'shirt_num'].astype(int)
 plot = pd.merge(df_contract, df_players, how='left', on='shirt_num')
 # %%
-plot.loc[:, 'date_of_birth'] = pd.to_datetime(plot['date_of_birth']).map(lambda x: x.strftime('%Y'))
-plot.loc[:, 'join_date'] = pd.to_datetime(plot['join_date']).map(lambda x: x.strftime('%Y'))
-plot.loc[:, 'contract_expire'] = pd.to_datetime(plot['contract_expire']).map(lambda x: x.strftime('%Y'))
+plot.loc[:, 'date_of_birth'] = pd.to_datetime(
+    plot['date_of_birth']).map(lambda x: x.strftime('%Y'))
+plot.loc[:, 'join_date'] = pd.to_datetime(
+    plot['join_date']).map(lambda x: x.strftime('%Y'))
+plot.loc[:, 'contract_expire'] = pd.to_datetime(
+    plot['contract_expire']).map(lambda x: x.strftime('%Y'))
 # %%
-plot['age_join'] = plot['join_date'].astype(int) - plot['date_of_birth'].astype(int)
-plot['age_exp'] = plot['contract_expire'].astype(int) - plot['date_of_birth'].astype(int)
+plot['age_join'] = plot['join_date'].astype(
+    int) - plot['date_of_birth'].astype(int)
+plot['age_exp'] = plot['contract_expire'].astype(
+    int) - plot['date_of_birth'].astype(int)
 # %%
