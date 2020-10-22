@@ -251,8 +251,8 @@ df.to_csv('/Users/Mai/Projects/football-analytics/data/rfef/20202021/fixtures.cs
 # print(f'take {t1-t0:.2f} s')
 
 # %%
-last_match = 28
-save_file = '/Users/Mai/Projects/football-analytics/data/rfrf/20202021/matches'
+last_match = 47
+save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
 
 for idx, item in df.iterrows():
     cnt = int(idx)
