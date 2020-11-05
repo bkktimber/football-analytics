@@ -17,7 +17,7 @@ col_names = [
 ]
 
 summary_col_names = [
-    'player_name', 'shirt_num', 'nationality', 'position', 'minute_played',
+    'player_name', 'shirt_num', 'nationality', 'position', 'age', 'minute_played',
     'goals', 'assists', 'penalties', 'penalty_attempt', 'shots',
     'shots_on_target', 'yellow_card', 'red_card', 'touch', 'pressure',
     'tackles', 'interceptions', 'blocks', 'xg', 'npxg', 'xa', 'sca', 'gca',
@@ -26,7 +26,7 @@ summary_col_names = [
 ]
 
 passing_col_names = [
-    'player_name', 'shirt_num', 'nationality', 'position', 'minute_played',
+    'player_name', 'shirt_num', 'nationality', 'position', 'age', 'minute_played',
     'passes', 'pass_attempts', 'pass_percentage', 'pass_yrd',
     'progress_pass_yrd', 'short_passes', 'short_pass_attempts',
     'short_pass_percentage', 'medium_passes', 'medium_pass_attempts',
@@ -37,7 +37,7 @@ passing_col_names = [
 ]
 
 passing_types_col_names = [
-    'player_name', 'shirt_num', 'nationality', 'position', 'minute_played',
+    'player_name', 'shirt_num', 'nationality', 'position', 'age', 'minute_played',
     'pass_attempts', 'live_ball', 'dead_ball', 'free_kicks', 'throw_ins',
     'pressing', 'switch_plays', 'crosses', 'corner_kicks', 'in_swing_corners',
     'out_swing_corners', 'straigth_corners', 'ground_passes', 'low_passes',
@@ -46,7 +46,7 @@ passing_types_col_names = [
 ]
 
 defense_col_names = [
-    'player_name', 'shirt_num', 'nationality', 'position', 'minute_played',
+    'player_name', 'shirt_num', 'nationality', 'position', 'age', 'minute_played',
     'tackles', 'tackles_won', 'tackles_def_3rd', 'tackles_mid_3rd',
     'tackles_akt_3rd', 'tackles_v_dribble', 'tackle_attempts_v_dribble',
     'tackles_v_dribble_percentage', 'past', 'pressure', 'pressure_success',
@@ -60,7 +60,7 @@ possession_col_names = [
     'player_name',
     'shirt_num',
     'nationality',
-    'position',
+    'position', 'age',
     'minute_played',
     'touches',
     'touches_def_pen',
@@ -85,7 +85,7 @@ possession_col_names = [
 ]
 
 misc_col_names = [
-    'player_name', 'shirt_num', 'nationality', 'position', 'minute_played',
+    'player_name', 'shirt_num', 'nationality', 'position', 'age', 'minute_played',
     'yellow_card', 'red_card', '2nd_yellow_card', 'fouls', 'fouled',
     'offsides', 'crosses', 'interceptions', 'tackles', 'penalty_won',
     'penalty_conceded', 'own_goals', 'recovery', 'aerial_won', 'aerial_lost',
@@ -93,7 +93,7 @@ misc_col_names = [
 ]
 
 keeper_col_names = [
-    'player_name', 'nationality', 'minute_played', 'shots_on_target_against',
+    'player_name', 'nationality', 'age', 'minute_played', 'shots_on_target_against',
     'goals_against', 'saves', 'save_percentage', 'psxg', 'launch_completed',
     'launch_attempts', 'launch_completed_percentage', 'pass_attempts',
     'throw_attempts', 'launch_to_pass', 'avg_pass_yrd', 'goal_kick_attempts',
@@ -294,17 +294,21 @@ def get_results_from_fixture(response=None,
 
 
 # %%
+url = 'https://fbref.com/en/comps/12/schedule/La-Liga-Scores-and-Fixtures'
+response = url_request(url)
+s, f = get_fixture(response, season_id=10731)
+data = extract_fixture(f)
+df = pd.DataFrame(data, columns=col_names)
+df.tail()
+
+# %%
 df.to_csv(
-    '/Users/Mai/Projects/football-analytics/data/epl/20202021/fixtures.csv')
+    '/Users/Mai/Projects/football-analytics/data/rfef/20202021/fixtures.csv')
 # t1 = time.time()
 # print(f'take {t1-t0:.2f} s')
 
 # %%
-<<<<<<< HEAD
-last_match = 47
-=======
-last_match = 18
->>>>>>> 1f535fa26e3455685490862a176fe0892cd26359
+last_match = 57
 save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
 
 for idx, item in df.iterrows():
