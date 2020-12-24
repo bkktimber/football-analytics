@@ -294,6 +294,12 @@ def get_results_from_fixture(response=None,
 
 
 # %%
+# League Code
+# EPL = 10728
+# La Liga = 10731
+# Bundesliga = 10737
+# Seria A = 10730
+# Ligue 1 = 10732
 url = 'https://fbref.com/en/comps/12/schedule/La-Liga-Scores-and-Fixtures'
 response = url_request(url)
 s, f = get_fixture(response, season_id=10731)
@@ -308,7 +314,8 @@ df.to_csv(
 # print(f'take {t1-t0:.2f} s')
 
 # %%
-last_match = 57
+last_match = 117
+# last_match = 117
 save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
 
 for idx, item in df.iterrows():
@@ -551,3 +558,5 @@ for idx, item in df.iterrows():
     time.sleep(i * 11)
     print(f'took {i * 11} s rest. ready to work!')
 # %%
+
+# DFP Match 64 Arminia Bielefield - Bayer Levekusen is missing
