@@ -183,3 +183,4 @@ dmypy.json
 data/
 resources/
 outputs/
+/data
