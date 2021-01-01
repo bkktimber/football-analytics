@@ -1,11 +1,16 @@
 # %%
+import requests
 import time
 import json
+import random
+import os
 import time
 import pickle
 
 from selenium import webdriver
 from bs4 import BeautifulSoup, Comment
+from glob import glob
+from tqdm import tqdm
 
 extraction_dict = {
     0: {'split_txt': 'var matchCentreData = ',
@@ -20,7 +25,7 @@ extraction_dict = {
         'type': 'terminate'},
 }
 # %%
-url = 'www.yoururl.com/whatever/you/want'
+url = 'https://www.whoscored.com/Matches/1485454/Live/England-Premier-League-2020-2021-Chelsea-Aston-Villa'
 
 driver = webdriver.Firefox(executable_path='/tmp/geckodriver')
 driver.get(url)
@@ -32,12 +37,13 @@ driver.quit()
 # %%
 data = soup.find('div', {'id': 'multiplex-parent'})
 data = data.find_next('script', {'type': 'text/javascript'})
+data = str(data).split(';')
+print(f'Found {len(data)} items from {url}.')
 
 # %%
 lst = []
-for idx in range(len(str(data).split(';'))):
+for idx, item in enumerate(data):
     extractor = extraction_dict.get(idx)
-    item = str(data).split(';')[idx]
     item = item.split(extractor['split_txt'])[-1]
     if extractor['type'] == 'json':
         lst.append(json.loads(item))
@@ -46,7 +52,6 @@ for idx in range(len(str(data).split(';'))):
     else:
         break
 # %%
-save_file_path = 'path/to/file.pkl'
-with open(save_file_path, 'wb') as f:
+with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/1485454/data.pkl', 'wb') as f:
     pickle.dump(lst, f, protocol=4)
 # %%
