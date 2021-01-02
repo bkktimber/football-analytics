@@ -28,6 +28,7 @@ extraction_dict = {
 base_dir = '/Users/Mai/Projects/football-analytics/data/whoscored'
 competition = 'epl'
 season = '20202021'
+
 def ensure_dst_dir(match_id: str=''):
     dst_dir = match_id
     dst_dir = os.path.join(base_dir, competition, season, dst_dir)
@@ -40,6 +41,20 @@ def ensure_dst_dir(match_id: str=''):
     else:
         raise OSError(f'Path existed at {dst_dir}')
     return dst_dir
+
+def save_pickle(dst_dir: str = None, data: list=[]):
+    if (dst_dir is not None) and (not data):
+        with open(os.path.join(dst_dir, 'data.pkl'), 'wb') as f:
+            pickle.dump(data, f, protocol=4)
+
+        with open(os.path.join(dst_dir, 'data.pkl'), 'rb') as f:
+            tmp = pickle.load(f)
+        for o, d in zip(data, tmp):
+            assert o == d     
+        print(f'Saved data to {dst_dir}')
+    else:
+        raise ValueError('Please specify destination path')
+    return None
 
 # %%
 url = 'https://www.whoscored.com/Matches/1485452/Live/England-Premier-League-2020-2021-Burnley-Sheffield-United'
@@ -71,6 +86,5 @@ for idx, item in enumerate(data):
     else:
         break
 # %%
-with open(os.path.join(dst_dir, 'data.pkl'), 'wb') as f:
-    pickle.dump(lst, f, protocol=4)
+save_pickle(dst_dir, lst)
 # %%
