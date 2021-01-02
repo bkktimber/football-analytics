@@ -24,8 +24,27 @@ extraction_dict = {
     4: {'split_txt': None,
         'type': 'terminate'},
 }
+
+base_dir = '/Users/Mai/Projects/football-analytics/data/whoscored'
+competition = 'epl'
+season = '20202021'
+def ensure_dst_dir(match_id: str=''):
+    dst_dir = match_id
+    dst_dir = os.path.join(base_dir, competition, season, dst_dir)
+    if not os.path.exists(dst_dir):
+        os.mkdir(dst_dir)
+        if os.path.exists(dst_dir):
+            print(f'Created directory at {dst_dir}')
+        else:
+            raise FileNotFoundError(f'Could not reate directory at {dst_dir}')
+    else:
+        raise OSError(f'Path existed at {dst_dir}')
+    return dst_dir
+
 # %%
-url = 'https://www.whoscored.com/Matches/1485454/Live/England-Premier-League-2020-2021-Chelsea-Aston-Villa'
+url = 'https://www.whoscored.com/Matches/1485452/Live/England-Premier-League-2020-2021-Burnley-Sheffield-United'
+match_id = url.split('/')[4]
+dst_dir = ensure_dst_dir(match_id=match_id)
 
 driver = webdriver.Firefox(executable_path='/tmp/geckodriver')
 driver.get(url)
@@ -52,6 +71,6 @@ for idx, item in enumerate(data):
     else:
         break
 # %%
-with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/1485454/data.pkl', 'wb') as f:
+with open(os.path.join(dst_dir, 'data.pkl'), 'wb') as f:
     pickle.dump(lst, f, protocol=4)
 # %%
