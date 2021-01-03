@@ -37,54 +37,77 @@ def ensure_dst_dir(match_id: str=''):
         if os.path.exists(dst_dir):
             print(f'Created directory at {dst_dir}')
         else:
-            raise FileNotFoundError(f'Could not reate directory at {dst_dir}')
+            raise FileNotFoundError(f'Could not create directory at {dst_dir}')
     else:
-        raise OSError(f'Path existed at {dst_dir}')
+        raise OSError(f'Path already existed at {dst_dir}')
     return dst_dir
 
-def save_pickle(dst_dir: str = None, data: list=[]):
-    if (dst_dir is not None) and (not data):
+def save_pickle(dst_dir: str = None, data: list=[], match_id: str = None):
+    assert match_id is not None
+    if (dst_dir is not None) and data:
         with open(os.path.join(dst_dir, 'data.pkl'), 'wb') as f:
             pickle.dump(data, f, protocol=4)
 
         with open(os.path.join(dst_dir, 'data.pkl'), 'rb') as f:
             tmp = pickle.load(f)
-        for o, d in zip(data, tmp):
-            assert o == d     
         print(f'Saved data to {dst_dir}')
+        print('verify pickle file.')
+        for i, (o, d) in enumerate(zip(data, tmp)):
+            assert o == d
+            if i == 2:
+                assert d == match_id
+        print('Completed.')
     else:
         raise ValueError('Please specify destination path')
     return None
+# %%
+with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/20210103_live_report_paths.pkl', 'rb') as f:
+    live_report_paths = pickle.load(f)
+print(f'has {len(live_report_paths)} matches')
+
+whoscored_base_url = 'https://www.whoscored.com'
+urls = [whoscored_base_url + p for p in live_report_paths]
 
 # %%
-url = 'https://www.whoscored.com/Matches/1485452/Live/England-Premier-League-2020-2021-Burnley-Sheffield-United'
-match_id = url.split('/')[4]
-dst_dir = ensure_dst_dir(match_id=match_id)
+for url in urls:
+    # url = 'https://www.whoscored.com/Matches/1485335/Live/England-Premier-League-2020-2021-West-Bromwich-Albion-Arsenal'
+    match_id = url.split('/')[4]
+    try:
+        dst_dir = ensure_dst_dir(match_id=match_id)
 
-driver = webdriver.Firefox(executable_path='/tmp/geckodriver')
-driver.get(url)
+        driver = webdriver.Firefox(executable_path='/tmp/geckodriver')
+        print(f'Opening {url}')
+        driver.get(url)
+        driver.execute_script("window.scrollTo(0, 1000)") 
+        soup = BeautifulSoup(driver.page_source, features='html.parser')
+        driver.execute_script("window.scrollTo(0, 800)") 
+        time.sleep(random.randint(13, 23))
+        driver.quit()
+        print('Extracting data..')
+        data = soup.find('div', {'id': 'multiplex-parent'})
+        data = data.find_next('script', {'type': 'text/javascript'})
+        data = str(data).split(';')
+        print(f'Found {len(data)} items from {url}.')
 
-soup = BeautifulSoup(driver.page_source, features='html.parser')
-time.sleep(10)
-driver.quit()
+        lst = []
+        for idx, item in enumerate(data):
+            extractor = extraction_dict.get(idx)
+            item = item.split(extractor['split_txt'])[-1]
+            if extractor['type'] == 'json':
+                lst.append(json.loads(item))
+            elif extractor['type'] == 'int':
+                lst.append(str(item))
+            else:
+                break
+        assert lst[2] == match_id
+        #
+        print('Wait for cool down.')
+        time.sleep(random.randint(13, 23))
+        save_pickle(dst_dir=dst_dir, data=lst, match_id=match_id)
 
-# %%
-data = soup.find('div', {'id': 'multiplex-parent'})
-data = data.find_next('script', {'type': 'text/javascript'})
-data = str(data).split(';')
-print(f'Found {len(data)} items from {url}.')
-
-# %%
-lst = []
-for idx, item in enumerate(data):
-    extractor = extraction_dict.get(idx)
-    item = item.split(extractor['split_txt'])[-1]
-    if extractor['type'] == 'json':
-        lst.append(json.loads(item))
-    elif extractor['type'] == 'int':
-        lst.append(int(item[:-1]))
-    else:
-        break
-# %%
-save_pickle(dst_dir, lst)
+        print('Wait a little longer')
+        time.sleep(random.randint(60, 180))
+        print('OK. Let\'s go!')
+    except OSError:
+        print('Go to next match')
 # %%
