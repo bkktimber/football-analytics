@@ -72,6 +72,10 @@ urls = [whoscored_base_url + p for p in live_report_paths]
 for url in urls:
     # url = 'https://www.whoscored.com/Matches/1485335/Live/England-Premier-League-2020-2021-West-Bromwich-Albion-Arsenal'
     match_id = url.split('/')[4]
+    if url.split('/')[5] != 'Live':
+        print('No Live Match Data. Please Check')
+        print(f'Skip match id: {match_id}')
+        continue
     try:
         dst_dir = ensure_dst_dir(match_id=match_id)
 
