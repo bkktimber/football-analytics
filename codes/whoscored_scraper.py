@@ -27,7 +27,7 @@ extraction_dict = {
 
 base_dir = '/Users/Mai/Projects/football-analytics/data/whoscored'
 competition = 'epl'
-season = '20202021'
+season = '20172018'
 
 def ensure_dst_dir(match_id: str=''):
     dst_dir = match_id
@@ -61,7 +61,7 @@ def save_pickle(dst_dir: str = None, data: list=[], match_id: str = None):
         raise ValueError('Please specify destination path')
     return None
 # %%
-with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/20210103_live_report_paths.pkl', 'rb') as f:
+with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20172018/all_live_report_paths.pkl', 'rb') as f:
     live_report_paths = pickle.load(f)
 print(f'has {len(live_report_paths)} matches')
 
@@ -69,7 +69,7 @@ whoscored_base_url = 'https://www.whoscored.com'
 urls = [whoscored_base_url + p for p in live_report_paths]
 
 # %%
-for url in urls:
+for ix, url in enumerate(urls):
     # url = 'https://www.whoscored.com/Matches/1485335/Live/England-Premier-League-2020-2021-West-Bromwich-Albion-Arsenal'
     match_id = url.split('/')[4]
     if url.split('/')[5] != 'Live':
@@ -78,8 +78,8 @@ for url in urls:
         continue
     try:
         dst_dir = ensure_dst_dir(match_id=match_id)
-
-        driver = webdriver.Firefox(executable_path='/tmp/geckodriver')
+        os.environ['MOZ_HEADLESS'] = '1'
+        driver = webdriver.Firefox(executable_path='/Users/Mai/Projects/football-analytics/gecko/geckodriver')
         print(f'Opening {url}')
         driver.get(url)
         driver.execute_script("window.scrollTo(0, 1000)") 
@@ -113,5 +113,7 @@ for url in urls:
         time.sleep(random.randint(60, 180))
         print('OK. Let\'s go!')
     except OSError:
-        print('Go to next match')
+        print('Go to next match')  
+    
+    print(f'Downloaded {ix+1} of {len(urls)} records')
 # %%

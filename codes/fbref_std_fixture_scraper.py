@@ -118,7 +118,7 @@ shot_col_names = [
 
 url_base = 'https://fbref.com/en'
 
-match_report_dir = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
+match_report_dir = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
 
 
 # %%
@@ -148,10 +148,10 @@ def get_fixture(response=None, season_id=None):
         return None
 
     fixture = soup.find('div', {
-        'class': 'overthrow table_container',
+        'class': 'table_container',
         'id': div_id
     })
-    fixture = fixture.find('table', {'id': table_id})
+    # fixture = fixture.find('table', {'id': table_id})
     fixture = fixture.find('tbody')
     fixture = fixture.find_all('tr')
     return [season_id, fixture]
@@ -246,7 +246,7 @@ print('No more fixure')
 
 soup = BeautifulSoup(response.content)
 table = soup.find('div', {
-    'class': 'overthrow table_container',
+    'class': 'table_container',
     'id': 'div_sched_ks_10728_1'
 })
 table = table.find('table', {'id': 'sched_ks_10728_1'})
@@ -295,11 +295,11 @@ def get_results_from_fixture(response=None,
 
 # %%
 # League Code
-# EPL = 10728
-# La Liga = 10731
-# Bundesliga = 10737
-# Seria A = 10730
-# Ligue 1 = 10732
+# EPL = 10728, https://fbref.com/en/comps/9/schedule/Premier-League-Scores-and-Fixtures
+# La Liga = 10731, https://fbref.com/en/comps/12/schedule/La-Liga-Scores-and-Fixtures
+# Bundesliga = 10737, https://fbref.com/en/comps/20/schedule/Bundesliga-Scores-and-Fixtures
+# Seria A = 10730, https://fbref.com/en/comps/11/schedule/Serie-A-Scores-and-Fixtures
+# Ligue 1 = 10732, https://fbref.com/en/comps/13/schedule/Ligue-1-Scores-and-Fixtures
 url = 'https://fbref.com/en/comps/12/schedule/La-Liga-Scores-and-Fixtures'
 response = url_request(url)
 s, f = get_fixture(response, season_id=10731)
@@ -314,8 +314,7 @@ df.to_csv(
 # print(f'take {t1-t0:.2f} s')
 
 # %%
-last_match = 117
-# last_match = 117
+last_match = 145
 save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
 
 for idx, item in df.iterrows():
@@ -505,7 +504,7 @@ for idx, item in df.iterrows():
     for team in [gk_home, gk_away]:
         table = soup.find(
             'div', {
-                'class': 'overthrow table_container',
+                'class': 'table_container',
                 'id': 'div_' + team['data'][0][4:]
             })
         table = table.find('table', {'id': team['data'][0][4:]})
