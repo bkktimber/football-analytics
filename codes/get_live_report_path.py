@@ -4,12 +4,13 @@ import os
 import pickle
 
 # %%
-with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/20210103_live_report_paths.pkl', 'rb') as f:
+live_path = '/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/20210103_live_report_paths.pkl'
+with open(live_path, 'rb') as f:
     live_report_paths = pickle.load(f)
 print(f'has {len(live_report_paths)} matches')
 
 # %%
-live_report_paths = []
+# live_report_paths = []
 # %%
 with open('/Users/Mai/Projects/football-analytics/codes/test.txt', 'r') as f:
     tmp = f.readline()
@@ -24,10 +25,10 @@ print(f'added {i+1} matches')
 print(f'now has {len(live_report_paths)} matches.')
 print(f'Last match is {live_report_paths[-1]}')
 # %%
-with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20172018/all_live_report_paths.pkl', 'wb') as f:
+with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/all_live_report_paths.pkl', 'wb') as f:
     pickle.dump(live_report_paths, f)
 
-with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20172018/all_live_report_paths.pkl', 'rb') as f:
+with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/all_live_report_paths.pkl', 'rb') as f:
     live_report_paths_2 = pickle.load(f)
 
 assert live_report_paths == live_report_paths_2

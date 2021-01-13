@@ -27,7 +27,7 @@ extraction_dict = {
 
 base_dir = '/Users/Mai/Projects/football-analytics/data/whoscored'
 competition = 'epl'
-season = '20172018'
+season = '20202021'
 
 def ensure_dst_dir(match_id: str=''):
     dst_dir = match_id
@@ -61,7 +61,7 @@ def save_pickle(dst_dir: str = None, data: list=[], match_id: str = None):
         raise ValueError('Please specify destination path')
     return None
 # %%
-with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20172018/all_live_report_paths.pkl', 'rb') as f:
+with open('/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/all_live_report_paths.pkl', 'rb') as f:
     live_report_paths = pickle.load(f)
 print(f'has {len(live_report_paths)} matches')
 
