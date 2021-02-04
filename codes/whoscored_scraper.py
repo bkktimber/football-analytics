@@ -29,6 +29,10 @@ base_dir = '/Users/Mai/Projects/football-analytics/data/whoscored'
 competition = 'epl'
 season = '20202021'
 
+with open(os.path.join(base_dir, 'test_data'), 'r') as f:
+    test_data = json.load(f)
+data_key_verify = test_data.keys()
+
 def ensure_dst_dir(match_id: str=''):
     dst_dir = match_id
     dst_dir = os.path.join(base_dir, competition, season, dst_dir)
@@ -45,17 +49,16 @@ def ensure_dst_dir(match_id: str=''):
 def save_pickle(dst_dir: str = None, data: list=[], match_id: str = None):
     assert match_id is not None
     if (dst_dir is not None) and data:
-        with open(os.path.join(dst_dir, 'data.pkl'), 'wb') as f:
+        with open(dst_dir + '.pkl', 'wb') as f:
             pickle.dump(data, f, protocol=4)
 
-        with open(os.path.join(dst_dir, 'data.pkl'), 'rb') as f:
+        with open(dst_dir + '.pkl', 'rb') as f:
             tmp = pickle.load(f)
         print(f'Saved data to {dst_dir}')
         print('verify pickle file.')
         for i, (o, d) in enumerate(zip(data, tmp)):
             assert o == d
-            if i == 2:
-                assert d == match_id
+            assert o.keys() == data_key_verify
         print('Completed.')
     else:
         raise ValueError('Please specify destination path')
@@ -70,7 +73,6 @@ urls = [whoscored_base_url + p for p in live_report_paths]
 
 # %%
 for ix, url in enumerate(urls):
-    # url = 'https://www.whoscored.com/Matches/1485335/Live/England-Premier-League-2020-2021-West-Bromwich-Albion-Arsenal'
     match_id = url.split('/')[4]
     if url.split('/')[5] != 'Live':
         print('No Live Match Data. Please Check')

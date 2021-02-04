@@ -3,11 +3,15 @@ import json
 import os
 import pickle
 import pandas as pd
+import matplotsoccer as mps
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 base_dir = '/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021'
 os.chdir(base_dir)
 # %%
-filename = '1485186/data.pkl'
+# filename = '1485326/data.pkl'
+filename = '1485208/data.pkl'
 os.path.isfile(filename)
 # %%
 with open(filename, 'rb') as f:
@@ -273,32 +277,54 @@ def getEventName(event_id: int=None):
     _values = list(event_id_dict.values())
     return _keys[_values.index(event_id)]
 # %%
+def convert_coordinate(values: pd.Series=None, mode='width') -> pd.Series:
+    '''
+        Opta coordinate data are normalised to [0, 1]
+        matplotsoccer coordinates are in metre.
+    '''
+    if mode == 'length':
+        coef = 105/100
+    else mode == 'width':
+        coef = 68/100
+    return values * coef
+
 def getMatchInfo(data):
     return None
 # %%
 # shows plot of football ptich
-_convert_l = lambda x: (105 * x/100)
-_convert_w = lambda x: (68 * x/100)
-ax = matplotsoccer.field(figsize=8, show=False)
+
+ax = mps.field(figsize=8, show=False)
 for i in range(len(data[0].get('events'))):
-    if data[0].get('events')[i].get('teamId') != 18:
-        ax.scatter(_convert_l(data[0].get('events')[i].get('x')), _convert_w(data[0].get('events')[i].get('y')), color='green')
-    else: continue
+    if data[0].get('events')[i].get('teamId') == 23:
+        ax.scatter(_convert_l(data[0].get('events')[i].get('x')), _convert_w(data[0].get('events')[i].get('y')), color='black')
+    else:
+        ax.scatter(_convert_l(data[0].get('events')[i].get('x')), _convert_w(data[0].get('events')[i].get('y')), color='blue')
 plt.show()
 # %%
 x = []
 y = []
 for i in range(len(data[0].get('events'))):
-    if data[0].get('events')[i].get('teamId') == 18:
-        x.append(data[0].get('events')[i].get('x'))
-        y.append(data[0].get('events')[i].get('y'))
+    if data[0].get('events')[i].get('teamId') != 23:
+        x.append(_convert_l(data[0].get('events')[i].get('x')))
+        y.append(_convert_w(data[0].get('events')[i].get('y')))
 
 x = pd.Series(x)
 y = pd.Series(y)
 # footbal pitch is a 6x3 grid
-hm = matplotsoccer.count(x, y, 6, 3)
-matplotsoccer.heatmap(hm)
+hm = mps.count(x, y, 6, 3)
+mps.heatmap(hm)
 plt.show()
 # %%
 
+# %%
+
+event_dir = '/Users/Mai/Projects/football-analytics/data/whoscored/epl/20172018'
+match_ids = [p for p in os.listdir(event_dir) if len(p.split('.')) == 1]
+for ix in tqdm(match_ids):
+    dst_dir = os.path.join(event_dir, ix)
+    with open(os.path.join(dst_dir, 'data.pkl'), 'rb') as f:
+        data = pickle.load(f)
+    
+    with open(dst_dir + '.pkl', 'wb') as f:
+        pickle.dump(data[0], f)
 # %%

@@ -4,7 +4,7 @@ import os
 import pickle
 
 # %%
-live_path = '/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/20210103_live_report_paths.pkl'
+live_path = '/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/all_live_report_paths.pkl'
 with open(live_path, 'rb') as f:
     live_report_paths = pickle.load(f)
 print(f'has {len(live_report_paths)} matches')
@@ -15,7 +15,7 @@ print(f'has {len(live_report_paths)} matches')
 with open('/Users/Mai/Projects/football-analytics/codes/test.txt', 'r') as f:
     tmp = f.readline()
 
-tmp = BeautifulSoup(tmp)
+tmp = BeautifulSoup(tmp, features='html.parser')
 results = tmp.find_all('div', {'class': 'col12-lg-1 col12-m-1 col12-s-0 col12-xs-0 result divtable-data'})
 print(len(results))
 print(f'has {len(live_report_paths)} matches')

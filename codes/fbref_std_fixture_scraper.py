@@ -77,11 +77,14 @@ possession_col_names = [
     'carries',
     'total_carry_yrd',
     'progress_carry_yrd',
+    'progress_carry_count',
+    'carry_to_final_third',
+    'carry_to_penalty_area',
+    'miscontrolled',
+    'dispossessed',
     'receive_target',
     'receives',
     'receive_percentage',
-    'miscontrolled',
-    'dispossessed',
 ]
 
 misc_col_names = [
@@ -118,7 +121,7 @@ shot_col_names = [
 
 url_base = 'https://fbref.com/en'
 
-match_report_dir = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+match_report_dir = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
 
 
 # %%
@@ -295,27 +298,27 @@ def get_results_from_fixture(response=None,
 
 # %%
 # League Code
-# EPL = 10728, https://fbref.com/en/comps/9/schedule/Premier-League-Scores-and-Fixtures
+# PL = 10728, https://fbref.com/en/comps/9/schedule/Premier-League-Scores-and-Fixtures
 # La Liga = 10731, https://fbref.com/en/comps/12/schedule/La-Liga-Scores-and-Fixtures
 # Bundesliga = 10737, https://fbref.com/en/comps/20/schedule/Bundesliga-Scores-and-Fixtures
 # Seria A = 10730, https://fbref.com/en/comps/11/schedule/Serie-A-Scores-and-Fixtures
 # Ligue 1 = 10732, https://fbref.com/en/comps/13/schedule/Ligue-1-Scores-and-Fixtures
-url = 'https://fbref.com/en/comps/12/schedule/La-Liga-Scores-and-Fixtures'
+url = 'https://fbref.com/en/comps/9/schedule/Premier-League-Scores-and-Fixtures'
 response = url_request(url)
-s, f = get_fixture(response, season_id=10731)
+s, f = get_fixture(response, season_id=10728)
 data = extract_fixture(f)
 df = pd.DataFrame(data, columns=col_names)
 df.tail()
 
 # %%
 df.to_csv(
-    '/Users/Mai/Projects/football-analytics/data/rfef/20202021/fixtures.csv')
+    '/Users/Mai/Projects/football-analytics/data/epl/20202021/fixtures.csv')
 # t1 = time.time()
 # print(f'take {t1-t0:.2f} s')
 
 # %%
-last_match = 145
-save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+last_match = 214
+save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
 
 for idx, item in df.iterrows():
     if not (item.match_id > last_match):
@@ -362,7 +365,7 @@ for idx, item in df.iterrows():
                 for col in row:
                     shot.append(col.text)
                 data.append(shot)
-            save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+            save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
             save_file = os.path.join(save_file, ('gw_' + item.gameweek))
             if not os.path.isdir(save_file):
                 os.mkdir(save_file)
@@ -384,7 +387,7 @@ for idx, item in df.iterrows():
                 for col in row:
                     shot.append(col.text)
                 data.append(shot)
-            save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+            save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
             save_file = os.path.join(save_file, ('gw_' + item.gameweek))
             if not os.path.isdir(save_file):
                 os.mkdir(save_file)
@@ -487,7 +490,7 @@ for idx, item in df.iterrows():
                         else:
                             player.append(col.text)
                 data.append(player)
-            save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+            save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
             save_file = os.path.join(save_file, ('gw_' + item.gameweek))
             if not os.path.isdir(save_file):
                 os.mkdir(save_file)
@@ -520,7 +523,7 @@ for idx, item in df.iterrows():
                     else:
                         player.append(col.text)
             data.append(player)
-            save_file = '/Users/Mai/Projects/football-analytics/data/rfef/20202021/matches'
+            save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
             save_file = os.path.join(save_file, ('gw_' + item.gameweek))
             if not os.path.isdir(save_file):
                 os.mkdir(save_file)
