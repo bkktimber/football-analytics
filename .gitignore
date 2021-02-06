@@ -183,5 +183,6 @@ dmypy.json
 data/
 resources/
 outputs/
-/data
 gecko/
+gk-analysis/
+charts/
