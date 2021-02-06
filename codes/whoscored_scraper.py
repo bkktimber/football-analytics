@@ -29,15 +29,15 @@ base_dir = '/Users/Mai/Projects/football-analytics/data/whoscored'
 competition = 'epl'
 season = '20202021'
 
-with open(os.path.join(base_dir, 'test_data'), 'r') as f:
+with open(os.path.join(base_dir, 'check_data_key.json'), 'r') as f:
     test_data = json.load(f)
 data_key_verify = test_data.keys()
 
 def ensure_dst_dir(match_id: str=''):
     dst_dir = match_id
     dst_dir = os.path.join(base_dir, competition, season, dst_dir)
-    if not os.path.exists(dst_dir):
-        os.mkdir(dst_dir)
+    if not os.path.isfile(dst_dir+'.pkl'):
+        # os.mkdir(dst_dir)
         if os.path.exists(dst_dir):
             print(f'Created directory at {dst_dir}')
         else:
@@ -50,15 +50,15 @@ def save_pickle(dst_dir: str = None, data: list=[], match_id: str = None):
     assert match_id is not None
     if (dst_dir is not None) and data:
         with open(dst_dir + '.pkl', 'wb') as f:
-            pickle.dump(data, f, protocol=4)
+            pickle.dump(data[0], f, protocol=4)
 
         with open(dst_dir + '.pkl', 'rb') as f:
             tmp = pickle.load(f)
         print(f'Saved data to {dst_dir}')
         print('verify pickle file.')
-        for i, (o, d) in enumerate(zip(data, tmp)):
-            assert o == d
-            assert o.keys() == data_key_verify
+        # for i, (o, d) in enumerate(zip(data[0], tmp)):
+        assert data[0] == tmp
+        assert tmp.keys() == data_key_verify
         print('Completed.')
     else:
         raise ValueError('Please specify destination path')

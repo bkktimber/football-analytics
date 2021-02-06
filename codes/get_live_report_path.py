@@ -7,7 +7,9 @@ import pickle
 live_path = '/Users/Mai/Projects/football-analytics/data/whoscored/epl/20202021/all_live_report_paths.pkl'
 with open(live_path, 'rb') as f:
     live_report_paths = pickle.load(f)
-print(f'has {len(live_report_paths)} matches')
+
+num_records = len(live_report_paths)
+print(f'has {num_records} matches')
 
 # %%
 # live_report_paths = []
@@ -17,10 +19,19 @@ with open('/Users/Mai/Projects/football-analytics/codes/test.txt', 'r') as f:
 
 tmp = BeautifulSoup(tmp, features='html.parser')
 results = tmp.find_all('div', {'class': 'col12-lg-1 col12-m-1 col12-s-0 col12-xs-0 result divtable-data'})
-print(len(results))
-print(f'has {len(live_report_paths)} matches')
-for i, div in enumerate(results):
-    live_report_paths.append(div.find('a')['href'])
+print(f'Found {len(results)} new matches.')
+i = 0
+for _, div in enumerate(results):
+    match_url = div.find('a')['href']
+    if match_url in live_report_paths:
+        continue
+    match_id = match_url.split('/')[2]
+    match_status = match_url.split('/')[3]
+    if match_status == 'Live':
+        live_report_paths.append(match_url)
+        i += 1
+    elif match_status == 'Show':
+        print(f'Match id {match_id} has not played.')
 print(f'added {i+1} matches')
 print(f'now has {len(live_report_paths)} matches.')
 print(f'Last match is {live_report_paths[-1]}')
