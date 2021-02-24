@@ -309,7 +309,7 @@ def _extract_player_stats(div_stats=None, team_uid=None, stats_type=None):
         stat_id_txt = f'div_stats_{team_uid}_{stats_type}'
     else:
         stat_id_txt = f'div_keeper_stats_{team_uid}'
-    print(stat_id_txt)
+    # print(stat_id_txt)
     stats = div_stats.find('div', {'id': stat_id_txt})
     stats = stats.find('tbody')
     stats = stats.find_all('tr')
@@ -321,7 +321,33 @@ def _extract_player_stats(div_stats=None, team_uid=None, stats_type=None):
 
 
 def get_match_data(path=None):
-    return [p.split('_')[-1] for p in glob(path)]
+    return [p for p in os.listdir(path) if not p.startswith('.')]
+
+
+def save_path_generator(base_path, filename):
+    assert os.path.isdir(base_path)
+    
+    target_path = os.path.join(base_path, filename)
+    return target_path
+
+
+def delay_timer():
+    print('enter sleep mode...')
+    i = random.randint(3, 7)
+    time.sleep(i * 11)
+    print(f'took {i * 11} s rest. ready to work!')
+    return None
+
+
+def ensure_match_dir(base_dir, match_id):
+    match_dir = os.path.join(base_dir, match_id)
+    if not os.path.isdir(match_dir):
+        os.mkdir(match_dir)
+        print('Created direcotry: ', match_dir)
+    else:
+        print('Path Existed')
+    return match_dir
+
 
 _read_comment = lambda text: isinstance(text, Comment)
 
@@ -331,57 +357,66 @@ match_report_dir = '/Users/Mai/Projects/football-analytics/data'
 season_name = '20202021'
 competition = 'epl'
 competition = list(competition_keys.get(competition).values())
+base_dir = os.path.join(match_report_dir,
+                       competition[0],
+                       season_name,)
 response = url_request(competition[2])
 s, f = get_fixture(response, season_id=competition[1])
 data = extract_fixture(f)
 df = pd.DataFrame(data, columns=col_names)
 df.tail()
-df.to_csv(os.path.join(match_report_dir,
-                       competition,
-                       season_name,
-                       'fixtures.pkl'))
+# %%
+df.to_csv(os.path.join(base_dir, 'fixtures.csv'))
 
-report_dir = ''
+report_dir = os.path.join(base_dir, 'matches')
 current_match_ids = get_match_data(report_dir)
 
 # %%
+# df = pd.read_csv('/Users/Mai/Projects/football-analytics/data/epl/202020211/fixtures.csv')
+# match_report_url = df.sample(random_state=42).loc[:, 'match_report_url']
+# match_report_url = match_report_url.values[0]
 
-df = pd.read_csv('/Users/Mai/Projects/football-analytics/data/epl/202020211/fixtures.csv')
-match_report_url = df.sample(random_state=42).loc[:, 'match_report_url']
-match_report_url = match_report_url.values[0]
-# %%
+match_urls = df.match_report_url.tolist()
 base_url = 'https://fbref.com'
-url = os.path.join(base_url, match_report_url[1:])
-response = url_request(url)
+match_data_dir = os.path.join(base_dir, 'matches')
+for url in match_urls:
+    url = os.path.join(base_url, url[1:])
+    match_id = url.split('/')[-2]
+    if match_id in current_match_ids:
+        print(f'Match {match_id} existed! Skip to next match.')
+        continue
+    response = url_request(url)
+    match_dir = ensure_match_dir(match_data_dir, match_id)
+    soup = BeautifulSoup(response.content)
+    div_scorebox = soup.find('div', {'class': 'scorebox',})
+    home_uid, away_uid = _get_team_uid(div_scorebox)
+    table_keys = [(uid, stats_type) for uid in [home_uid, away_uid] for stats_type in stats_types]
 
-soup = BeautifulSoup(response.content)
-div_scorebox = soup.find('div', {'class': 'scorebox',})
-home_uid, away_uid = _get_team_uid(div_scorebox)
-table_keys = [(uid, stats_type) for uid in [home_uid, away_uid] for stats_type in stats_types]
+    div_lineups = soup.find('div', {'id': 'field_wrap'})
+    home_lineup, away_lineup = _extract_lineup(div_lineups)
+    home_lineup = pd.DataFrame(home_lineup, columns=lineup_col_names)
+    away_lineup = pd.DataFrame(away_lineup, columns=lineup_col_names)
 
-div_lineups = soup.find('div', {'id': 'field_wrap'})
-home_lineup, away_lineup = _extract_lineup(div_lineups)
-home_lineup = pd.DataFrame(home_lineup, columns=lineup_col_names)
-away_lineup = pd.DataFrame(away_lineup, columns=lineup_col_names)
+    div_shots = soup.find('div', {'class': 'section_content',
+                                'id': 'div_kitchen_sink_shots',
+                                })
+    for uid in [home_uid, away_uid]:
+        shot_data = _extract_shots(div_shots=div_shots, team_uid=uid)
+        shot_data = pd.DataFrame(shot_data, columns=shot_col_names)
 
-div_shots = soup.find('div', {'class': 'section_content',
-                              'id': 'div_kitchen_sink_shots',
-                              })
-for uid in [home_uid, away_uid]:
-    shot_data = _extract_shots(div_shots=div_shots, team_uid=uid)
-    shot_data = pd.DataFrame(shot_data, columns=col_names)
-
-for key in table_keys:
-    uid = key[0]
-    stat_type = key[1]
-    if stat_type == 'keeper':
-        id_txt = f'all_keeper_stats_{uid}'      
-        player_stats = soup.find('div', {'id': id_txt})
-    else:
-        id_txt = f'all_player_stats_{uid}'              
-        player_stats = soup.find('div', {'id': id_txt})
-    player_data = _extract_player_stats(player_stats, uid, stat_type)
-    player_data = pd.DataFrame(player_data, columns=col_names_dict[stat_type])
-
-
+    for key in table_keys:
+        uid = key[0]
+        stat_type = key[1]
+        filename = f'{uid}_{stat_type}.csv'
+        if stat_type == 'keeper':
+            id_txt = f'all_keeper_stats_{uid}'      
+            player_stats = soup.find('div', {'id': id_txt})
+        else:
+            id_txt = f'all_player_stats_{uid}'              
+            player_stats = soup.find('div', {'id': id_txt})
+        player_data = _extract_player_stats(player_stats, uid, stat_type)
+        player_data = pd.DataFrame(player_data, columns=col_names_dict[stat_type])
+        player_data.to_csv(os.path.join(match_dir, filename))
+    print(f'Donwload {url}.')
+    delay_timer()
 # %%

@@ -121,7 +121,7 @@ shot_col_names = [
 
 url_base = 'https://fbref.com/en'
 
-match_report_dir = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
+match_report_dir = '/Users/Mai/Projects/football-analytics/data/epl/202020211/matches'
 
 
 # %%
@@ -312,13 +312,13 @@ df.tail()
 
 # %%
 df.to_csv(
-    '/Users/Mai/Projects/football-analytics/data/epl/20202021/fixtures.csv')
+    '/Users/Mai/Projects/football-analytics/data/epl/202020211/fixtures.csv')
 # t1 = time.time()
 # print(f'take {t1-t0:.2f} s')
 
 # %%
-last_match = 214
-save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
+last_match = 219
+save_file = '/Users/Mai/Projects/football-analytics/data/epl/202020211/matches'
 
 for idx, item in df.iterrows():
     if not (item.match_id > last_match):
@@ -365,7 +365,7 @@ for idx, item in df.iterrows():
                 for col in row:
                     shot.append(col.text)
                 data.append(shot)
-            save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
+            save_file = '/Users/Mai/Projects/football-analytics/data/epl/202020211/matches'
             save_file = os.path.join(save_file, ('gw_' + item.gameweek))
             if not os.path.isdir(save_file):
                 os.mkdir(save_file)
@@ -387,7 +387,7 @@ for idx, item in df.iterrows():
                 for col in row:
                     shot.append(col.text)
                 data.append(shot)
-            save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
+            save_file = '/Users/Mai/Projects/football-analytics/data/epl/202020211/matches'
             save_file = os.path.join(save_file, ('gw_' + item.gameweek))
             if not os.path.isdir(save_file):
                 os.mkdir(save_file)
@@ -490,7 +490,7 @@ for idx, item in df.iterrows():
                         else:
                             player.append(col.text)
                 data.append(player)
-            save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
+            save_file = '/Users/Mai/Projects/football-analytics/data/epl/202020211/matches'
             save_file = os.path.join(save_file, ('gw_' + item.gameweek))
             if not os.path.isdir(save_file):
                 os.mkdir(save_file)
@@ -523,7 +523,7 @@ for idx, item in df.iterrows():
                     else:
                         player.append(col.text)
             data.append(player)
-            save_file = '/Users/Mai/Projects/football-analytics/data/epl/20202021/matches'
+            save_file = '/Users/Mai/Projects/football-analytics/data/epl/202020211/matches'
             save_file = os.path.join(save_file, ('gw_' + item.gameweek))
             if not os.path.isdir(save_file):
                 os.mkdir(save_file)
@@ -560,5 +560,3 @@ for idx, item in df.iterrows():
     time.sleep(i * 11)
     print(f'took {i * 11} s rest. ready to work!')
 # %%
-
-# DFP Match 64 Arminia Bielefield - Bayer Levekusen is missing
