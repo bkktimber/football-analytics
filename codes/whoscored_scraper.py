@@ -36,8 +36,8 @@ data_key_verify = test_data.keys()
 def ensure_dst_dir(match_id: str=''):
     dst_dir = match_id
     dst_dir = os.path.join(base_dir, competition, season, dst_dir)
-    if not os.path.isfile(dst_dir+'.pkl'):
-        # os.mkdir(dst_dir)
+    if not os.path.exists(dst_dir+'.pkl'):
+        os.mkdir(dst_dir)
         if os.path.exists(dst_dir):
             print(f'Created directory at {dst_dir}')
         else:
@@ -115,7 +115,8 @@ for ix, url in enumerate(urls):
         time.sleep(random.randint(60, 180))
         print('OK. Let\'s go!')
     except OSError:
-        print('Go to next match')  
+        print('Go to next match')
+
     
     print(f'Downloaded {ix+1} of {len(urls)} records')
 # %%
