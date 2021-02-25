@@ -355,7 +355,7 @@ _read_comment = lambda text: isinstance(text, Comment)
 # %%
 match_report_dir = '/Users/Mai/Projects/football-analytics/data'
 season_name = '20202021'
-competition = 'epl'
+competition = 'laliga'
 competition = list(competition_keys.get(competition).values())
 base_dir = os.path.join(match_report_dir,
                        competition[0],
@@ -370,11 +370,6 @@ df.to_csv(os.path.join(base_dir, 'fixtures.csv'))
 
 report_dir = os.path.join(base_dir, 'matches')
 current_match_ids = get_match_data(report_dir)
-
-# %%
-# df = pd.read_csv('/Users/Mai/Projects/football-analytics/data/epl/202020211/fixtures.csv')
-# match_report_url = df.sample(random_state=42).loc[:, 'match_report_url']
-# match_report_url = match_report_url.values[0]
 
 match_urls = df.match_report_url.tolist()
 base_url = 'https://fbref.com'
@@ -417,6 +412,6 @@ for url in match_urls:
         player_data = _extract_player_stats(player_stats, uid, stat_type)
         player_data = pd.DataFrame(player_data, columns=col_names_dict[stat_type])
         player_data.to_csv(os.path.join(match_dir, filename))
-    print(f'Donwload {url}.')
+    print(f'Donwloaded {url}.')
     delay_timer()
 # %%
