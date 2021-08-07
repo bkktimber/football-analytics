@@ -25,7 +25,11 @@ competition_keys = {
     'bundesliga' : {'competition_name': 'dfb',
              'competition_id': 10737,
              'competition_fixture_url': 'https://fbref.com/en/comps/20/schedule/Bundesliga-Scores-and-Fixtures',},
-    
+
+# https://fbref.com/en/comps/13/
+# 3243/schedule/2019-2020-Ligue-1-Scores-and-Fixtures
+                        #-Ligue-1-Scores-and-Fixtures
+# {season_id}/schedule/{year-year}--Ligue-1-Scores-and-Fixtures
 }
 
 col_names = [
@@ -172,8 +176,8 @@ def get_fixture(response=None, season_id=None):
     target_url = response.url
     if season_id is None:
         season_id = target_url.split('/')[6]
-    div_id = f'div_sched_ks_{season_id}_1'
-    table_id = f'sched_ks_{season_id}_1'
+    div_id = f'div_sched_{season_id}_1'
+    table_id = f'sched_{season_id}_1'
     print(div_id, table_id)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content)
@@ -206,11 +210,13 @@ def check_previous(content=None):
     return [has_previous, link]
 
 
-def extract_fixture(fixture_list=None, match_week=(0, 0), match_id=(0, 0)):
+def extract_fixture(fixture_list=None, 
+                    # match_week=(0, 0), match_id=(0, 0)
+                    ):
     data = []
     idx = 0
-    (week_start, week_end) = match_week
-    (match_start, match_end) = match_id
+    # (week_start, week_end) = match_week
+    # (match_start, match_end) = match_id
     for row in fixture_list:
         if not row.attrs.get('class'):
             match = []
@@ -284,11 +290,12 @@ def _extract_lineup(div_field=None):
 
 
 def _extract_shots(div_shots=None, team_uid=None):
-    id_txt = f'all_shots_{team_uid}'
+    id_txt = f'div_shots_{team_uid}'
     table = div_shots.find('div', {'id': id_txt})
     if table:
-        rows = BeautifulSoup(table.find(string=_read_comment))
-        rows = rows.find_all('tr')
+        # rows = BeautifulSoup(table.find(string=_read_comment))
+        # rows = rows.find_all('tr')
+        rows = table.find_all('tr')
         data = [[item.text for item in row] for ix, row in enumerate(rows) if ix > 2]
     else:
         data = []
@@ -355,7 +362,7 @@ _read_comment = lambda text: isinstance(text, Comment)
 # %%
 match_report_dir = '/Users/Mai/Projects/football-analytics/data'
 season_name = '20202021'
-competition = 'laliga'
+competition = 'epl'
 competition = list(competition_keys.get(competition).values())
 base_dir = os.path.join(match_report_dir,
                        competition[0],
@@ -389,15 +396,19 @@ for url in match_urls:
 
     div_lineups = soup.find('div', {'id': 'field_wrap'})
     home_lineup, away_lineup = _extract_lineup(div_lineups)
-    home_lineup = pd.DataFrame(home_lineup, columns=lineup_col_names)
-    away_lineup = pd.DataFrame(away_lineup, columns=lineup_col_names)
+    lup_zip = zip([home_uid, away_uid], [home_lineup, away_lineup])
+    for uid, lup in lup_zip:
+        filename = f'{uid}_lineup.csv'
+        team_lineup = pd.DataFrame(lup, columns=lineup_col_names)
+        team_lineup.to_csv(os.path.join(match_dir, filename))
 
-    div_shots = soup.find('div', {'class': 'section_content',
-                                'id': 'div_kitchen_sink_shots',
+    div_shots = soup.find('div',{'id': 'all_shots',
                                 })
     for uid in [home_uid, away_uid]:
+        filename = f'{uid}_shots.csv'
         shot_data = _extract_shots(div_shots=div_shots, team_uid=uid)
         shot_data = pd.DataFrame(shot_data, columns=shot_col_names)
+        shot_data.to_csv(os.path.join(match_dir, filename))
 
     for key in table_keys:
         uid = key[0]
