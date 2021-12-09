@@ -1,3 +1,5 @@
 outs:
-- md5: c4f4821b4091d32ed68c4ded9e17bc7d.dir
+- md5: ab2808a7f5169cc980e2ff1b896536ff.dir
   path: resources
+  size: 3051716
+  nfiles: 222
